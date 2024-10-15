@@ -14,6 +14,12 @@ namespace Client
         {
             services.ConfigureServiceOptions<CosmosDbClientOptions>((_, options) => configureCosmosDbClientOptions(options));
 
+            services.AddSingleton<CosmosClient>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<CosmosDbClientOptions>>().Value;
+                return new CosmosClient(options.EndpointUri, options.PrimaryKey);
+            });
+
             services.AddSingleton<Container>(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<CosmosDbClientOptions>>().Value;
