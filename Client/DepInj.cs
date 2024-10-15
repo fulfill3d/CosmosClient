@@ -1,6 +1,8 @@
 using Client.Interfaces;
 using Client.Options;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Client
 {
@@ -11,6 +13,14 @@ namespace Client
             Action<CosmosDbClientOptions> configureCosmosDbClientOptions)
         {
             services.ConfigureServiceOptions<CosmosDbClientOptions>((_, options) => configureCosmosDbClientOptions(options));
+
+            services.AddSingleton<Container>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<CosmosDbClientOptions>>().Value;
+                var cosmosClient = sp.GetRequiredService<CosmosClient>();
+                return cosmosClient.GetContainer(options.DatabaseId, options.ContainerId);
+            });
+            
             services.AddTransient<ICosmosDbClient, CosmosDbClient>();
         }
 
